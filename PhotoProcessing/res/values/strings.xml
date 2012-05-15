@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PhotoProcessing</string>
+    <string name="buttonLoad">Load</string>
+    <string name="buttonEdit">Edit</string>
+    <string name="buttonFilter">Filter</string>
+    <string name="buttonSave">Save</string>
+
+    <!-- Filter names -->
+    <string name="filter_original">Original</string>
+    <string name="filter_instafix">Instafix</string>
+    <string name="filter_ansel">Ansel</string>
+    <string name="filter_testino">Testino</string>
+    <string name="filter_xpro">XPro</string>
+    <string name="filter_bw">Black &amp; White</string>
+    <string name="filter_sepia">Sepia</string>
+    <string name="filter_cyano">Cyano</string>
+    <string name="filter_retro">Retro</string>
+    <string name="filter_georgia">Georgia</string>
+    <string name="filter_sahara">Sahara</string>
+    <string name="filter_hdr">HDR</string>
+    
+    <!-- Edit actions -->    
+    <string name="edit_action_flip">Flip</string>
+    <string name="edit_action_rotate_90_right">Rotate 90° Right</string>
+    <string name="edit_action_rotate_90_left">Rotate 90° Left</string>
+    <string name="edit_action_rotate_180">Rotate 180°</string>
+    
+    <!-- Progress Dialogs -->
+    <string name="reverting_to_original">Reverting to original&#8230;</string>
+    <string name="applying_filter">Applying %s filter&#8230;</string>
+    <string name="flipping">Flipping horizontally&#8230;</string>
+    <string name="rotating_90_right">Rotating 90° right&#8230;</string>
+    <string name="rotating_90_left">Rotating 90° left&#8230;</string>
+    <string name="rotating_180">Rotating 180°&#8230;</string>
+</resources>
