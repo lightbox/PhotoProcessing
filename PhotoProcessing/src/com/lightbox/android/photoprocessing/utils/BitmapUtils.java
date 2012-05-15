@@ -41,4 +41,32 @@ public class BitmapUtils {
 	    	    
 	    return BitmapFactory.decodeFile(filePath, options);
 	}
+	
+	public static BitmapSize getBitmapSize(String filePath) {
+		Options options = new Options();
+		options.inJustDecodeBounds = true;
+		
+		BitmapFactory.decodeFile(filePath, options);
+		
+		return new BitmapSize(options.outWidth, options.outHeight);
+	}
+	
+	public static BitmapSize getScaledSize(int originalWidth, int originalHeight, int numPixels) {
+		float ratio = (float)originalWidth/originalHeight;
+		
+		int scaledHeight = (int)FloatMath.sqrt((float)numPixels/ratio);
+		int scaledWidth = (int)(ratio * FloatMath.sqrt((float)numPixels/ratio));
+				
+		return new BitmapSize(scaledWidth, scaledHeight);
+	}
+	
+	public static class BitmapSize {		
+		public int width;
+		public int height;
+		
+		public BitmapSize(int width, int height) {
+			this.width = width;
+			this.height = height;
+		}
+	}
 }

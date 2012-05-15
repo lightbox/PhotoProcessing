@@ -16,7 +16,9 @@ import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.lightbox.android.photoprocessing.utils.BitmapUtils;
+import com.lightbox.android.photoprocessing.utils.BitmapUtils.BitmapSize;
+import com.lightbox.android.photoprocessing.utils.FileUtils;
 import com.lightbox.android.photoprocessing.utils.MediaUtils;
 
 public class PhotoProcessingActivity extends Activity {
@@ -49,6 +53,7 @@ public class PhotoProcessingActivity extends Activity {
 	
 	private static FilterTask sFilterTask;	
 	private static EditActionTask sEditActionTask;
+	private static SavePhotoTask sSavePhotoTask;
 		
 	private ProgressDialog mProgressDialog = null;
 	
@@ -78,6 +83,9 @@ public class PhotoProcessingActivity extends Activity {
 		}
 		if (sEditActionTask != null) {
 			sEditActionTask.reattachActivity(this);
+		}
+		if (sSavePhotoTask != null) {
+			sSavePhotoTask.reattachActivity(this);
 		}
 		super.onResume();
 	}
@@ -120,6 +128,9 @@ public class PhotoProcessingActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		
 		if (requestCode == REQUEST_CODE_SELECT_PHOTO && resultCode == RESULT_OK) {
+			if (mEditActions != null) {
+				mEditActions.clear();
+			}
 			Uri photoUri = data.getData();
 			mImageView.setImageBitmap(null);
 			mOriginalPhotoPath = MediaUtils.getPath(this, photoUri);
@@ -162,7 +173,8 @@ public class PhotoProcessingActivity extends Activity {
 	}
 	
 	public void onSaveButtonClick(View v) {
-		
+		sSavePhotoTask = new SavePhotoTask(this);
+		sSavePhotoTask.execute();		
 	}
 	
 	private void saveToCache(Bitmap bitmap) {
@@ -179,6 +191,30 @@ public class PhotoProcessingActivity extends Activity {
 		} finally {
 			if (fos != null) {
 				bitmap.compress(CompressFormat.JPEG, 100, fos);
+				try {
+					fos.flush();
+					fos.close();
+				} catch (IOException e) {
+					// Do nothing
+				}
+			}
+		}
+	}
+	
+	private void savePhoto(Bitmap bitmap) {
+		File file = new File(mOriginalPhotoPath);
+		File saveDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Lightbox/");
+		saveDir.mkdir();
+		File saveFile = new File(saveDir, file.getName());
+		
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(saveFile);
+			bitmap.compress(CompressFormat.JPEG, 95, fos);
+		} catch (FileNotFoundException e) {
+			Log.w(TAG, e);
+		} finally {
+			if (fos != null) {
 				try {
 					fos.flush();
 					fos.close();
@@ -242,6 +278,11 @@ public class PhotoProcessingActivity extends Activity {
 			message = getString(R.string.rotating_180);
 			break;
 		}
+		mProgressDialog = ProgressDialog.show(this, "", message);
+	}
+	
+	private void showSavingProgressDialog() {
+		String message = "Saving...";
 		mProgressDialog = ProgressDialog.show(this, "", message);
 	}
 	
@@ -444,22 +485,61 @@ public class PhotoProcessingActivity extends Activity {
 	}
 	
 	private static class SavePhotoTask extends AsyncTask<Void, Void, Void> {
+		WeakReference<PhotoProcessingActivity> mActivityRef;
+		
+		public SavePhotoTask(PhotoProcessingActivity activity) {
+			mActivityRef = new WeakReference<PhotoProcessingActivity>(activity);
+		}
+		
+		public void reattachActivity(PhotoProcessingActivity activity) {
+			mActivityRef = new WeakReference<PhotoProcessingActivity>(activity);
+			if (getStatus().equals(Status.RUNNING)) {
+				activity.showSavingProgressDialog();
+			}
+		}
+		
+		private PhotoProcessingActivity getActivity() {
+			if (mActivityRef == null) {
+				return null;
+			}
+			
+			return mActivityRef.get();
+		}
 		
 		@Override
 		protected void onPreExecute() {
-			//TODO show progress dialog
+			PhotoProcessingActivity activity = getActivity();
+			if (activity != null) {
+				activity.showSavingProgressDialog();
+			}
 		}
 		
 		@Override
 		protected Void doInBackground(Void... params) {
-			// TODO Auto-generated method stub
+			PhotoProcessingActivity activity = getActivity();
+			if (activity != null) {
+				File jpegFile = new File(activity.mOriginalPhotoPath);
+				try {
+					byte[] jpegData = FileUtils.readFileToByteArray(jpegFile);
+					PhotoProcessing.nativeLoadResizedJpegBitmap(jpegData, jpegData.length, 1024 * 1024 * 2);
+					Bitmap bitmap = PhotoProcessing.filterPhoto(null, activity.mCurrentFilter);
+					for (Integer editAction : activity.mEditActions) {
+						bitmap = PhotoProcessing.applyEditAction(bitmap, editAction);
+					}
+					activity.savePhoto(bitmap);
+				} catch (IOException e) {
+					Log.w(TAG, e);
+				} 
+			}
 			return null;
 		}
 		
 		@Override
 		protected void onPostExecute(Void result) {
-			//TODO hide progress
-			super.onPostExecute(result);
+			PhotoProcessingActivity activity = getActivity();
+			if (activity != null) {
+				activity.hideProgressDialog();
+			}
 		}
 	}
 }

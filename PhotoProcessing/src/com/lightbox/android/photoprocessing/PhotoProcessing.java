@@ -31,7 +31,9 @@ public class PhotoProcessing {
 	public static final int[] EDIT_ACTIONS = {R.string.edit_action_flip, R.string.edit_action_rotate_90_right, R.string.edit_action_rotate_90_left, R.string.edit_action_rotate_180};
 	
 	public static Bitmap filterPhoto(Bitmap bitmap, int position) {
-		sendBitmapToNative(bitmap);
+		if (bitmap != null) { //USe current bitmap in native memory
+			sendBitmapToNative(bitmap);
+		}
 		switch (position) {
 		case 0: // Original
 			break;
@@ -122,6 +124,9 @@ public class PhotoProcessing {
 	public static native void nativeApplySahara();
 	public static native void nativeApplyHDR();
 	
+	public static native void nativeLoadResizedJpegBitmap(byte[] jpegData, int size, int maxPixels);
+	public static native void nativeResizeBitmap(int newWidth, int newHeight);
+	
 	private static void sendBitmapToNative(Bitmap bitmap) {
 		int width = bitmap.getWidth();
 		int height = bitmap.getHeight();
@@ -137,11 +142,12 @@ public class PhotoProcessing {
 		int width = nativeGetBitmapWidth();
 		int height = nativeGetBitmapHeight();
 		
-		if (bitmap == null) {
-			return null;
-		} else if (width != bitmap.getWidth() || height != bitmap.getHeight() || !bitmap.isMutable()) { //in case it was rotated and the dimensions changed
-			Config config = bitmap.getConfig();
-			bitmap.recycle();
+		if (bitmap == null || width != bitmap.getWidth() || height != bitmap.getHeight() || !bitmap.isMutable()) { //in case it was rotated and the dimensions changed
+			Config config = Config.ARGB_8888;
+			if (bitmap != null) {
+				config = bitmap.getConfig();
+				bitmap.recycle();
+			}
 			bitmap = Bitmap.createBitmap(width, height, config);
 		}
 

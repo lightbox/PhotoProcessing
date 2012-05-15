@@ -117,8 +117,6 @@ void Java_com_lightbox_android_photoprocessing_PhotoProcessing_nativeApplyHDR(JN
 	applyHDR(&bitmap);
 }
 
-
-
 int Java_com_lightbox_android_photoprocessing_PhotoProcessing_nativeLoadResizedJpegBitmap(JNIEnv* env, jobject thiz, jbyteArray bytes, jint jpegSize, jint maxPixels) {
 	char* jpegData = (char*) (*env)->GetPrimitiveArrayCritical(env, bytes, NULL);
 
