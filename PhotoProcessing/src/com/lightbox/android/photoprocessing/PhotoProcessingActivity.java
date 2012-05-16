@@ -54,6 +54,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lightbox.android.photoprocessing.R.id;
 import com.lightbox.android.photoprocessing.utils.BitmapUtils;
 import com.lightbox.android.photoprocessing.utils.FileUtils;
 import com.lightbox.android.photoprocessing.utils.MediaUtils;
@@ -123,6 +124,10 @@ public class PhotoProcessingActivity extends Activity {
 				sEditActionTask.execute(position);
 			}
 		});
+
+		findViewById(R.id.buttonFilter).setEnabled(false);
+		findViewById(R.id.buttonEdit).setEnabled(false);
+		findViewById(R.id.buttonSave).setEnabled(false);
 	}
 	
 	@Override
@@ -207,17 +212,10 @@ public class PhotoProcessingActivity extends Activity {
 		}
 	}
 	
-	private int getCameraFileCount() {
-		SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		return prefs.getInt(PREFS_KEY_CAMERA_FILE_COUNT, 0);
-	}
-	
-	private void incrementCameraFileCount() {
-		SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		int count = prefs.getInt(PREFS_KEY_CAMERA_FILE_COUNT, 0) + 1;
-		Editor editor = prefs.edit();
-		editor.putInt(PREFS_KEY_CAMERA_FILE_COUNT, count);
-		editor.apply();
+	private void enableFilterEditAndSaveButtons() {
+		findViewById(R.id.buttonFilter).setEnabled(true);
+		findViewById(R.id.buttonEdit).setEnabled(true);
+		findViewById(R.id.buttonSave).setEnabled(true);
 	}
 	
 	public void onGalleryButtonClick(View v) {
@@ -264,6 +262,19 @@ public class PhotoProcessingActivity extends Activity {
 		sSavePhotoTask.execute();		
 	}
 
+	private int getCameraFileCount() {
+		SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		return prefs.getInt(PREFS_KEY_CAMERA_FILE_COUNT, 0);
+	}
+	
+	private void incrementCameraFileCount() {
+		SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		int count = prefs.getInt(PREFS_KEY_CAMERA_FILE_COUNT, 0) + 1;
+		Editor editor = prefs.edit();
+		editor.putInt(PREFS_KEY_CAMERA_FILE_COUNT, count);
+		editor.apply();
+	}
+	
 	private void showFilterList() {
 		if (mIsFilterListShowing) {
 			return;
@@ -488,6 +499,8 @@ public class PhotoProcessingActivity extends Activity {
 		if (mBitmap != null && !mBitmap.isMutable()) {
 			mBitmap = PhotoProcessing.makeBitmapMutable(mBitmap);
 		}
+		
+		enableFilterEditAndSaveButtons();
 	}
 	
 	private void showTempPhotoInImageView() {
@@ -506,6 +519,8 @@ public class PhotoProcessingActivity extends Activity {
 		
 		File cacheFile = new File(getCacheDir(), "cached.jpg");
 		mBitmap = BitmapUtils.getSampledBitmap(cacheFile.getAbsolutePath(), displayMetrics.widthPixels, displayMetrics.heightPixels);
+		
+		enableFilterEditAndSaveButtons();
 	}
 	
 	private void showFilterProgressDialog() {
