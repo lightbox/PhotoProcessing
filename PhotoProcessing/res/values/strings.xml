@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PhotoProcessing</string>
+    
     <string name="buttonLoad">Load</string>
     <string name="buttonEdit">Edit</string>
     <string name="buttonFilter">Filter</string>

@@ -27,13 +27,15 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,10 +62,15 @@ public class PhotoProcessingActivity extends Activity {
 	private static final String TAG = "PhotoProcessingActivity";
 	
 	public static final int REQUEST_CODE_SELECT_PHOTO = 1;
+	public static final int REQUEST_CODE_CAMERA = 2;
+	
+	private static final String PREFS_NAME = "PhotoProcessingPrefsFiles";
+	private static final String PREFS_KEY_CAMERA_FILE_COUNT = "PrefsKeyCameraFileCount";
 	
 	private static final String SAVE_STATE_PATH = "com.lightbox.android.photoprocessing.PhotoProcessing.mOriginalPhotoPath";
 	private static final String SAVE_CURRENT_FILTER = "com.lightbox.android.photoprocessing.PhotoProcessing.mCurrentFilter";
-	private static final String SAVE_EDIT_ACTIONS= "com.lightbox.android.photoprocessing.PhotoProcessing.mEditActions";
+	private static final String SAVE_EDIT_ACTIONS = "com.lightbox.android.photoprocessing.PhotoProcessing.mEditActions";
+	private static final String SAVE_CAMERA_FILE_PATH = "com.lightbox.android.photoprocessing.PhotoProcessing.mCurrentCameraFilePath";
 	
 	private String mOriginalPhotoPath = null;
 	private Bitmap mBitmap = null;
@@ -144,6 +151,7 @@ public class PhotoProcessingActivity extends Activity {
 		outState.putString(SAVE_STATE_PATH, mOriginalPhotoPath);
 		outState.putInt(SAVE_CURRENT_FILTER, mCurrentFilter);
 		outState.putIntegerArrayList(SAVE_EDIT_ACTIONS, mEditActions);
+		outState.putString(SAVE_CAMERA_FILE_PATH, mOriginalPhotoPath);
 	}
 	
 	@Override
@@ -155,6 +163,10 @@ public class PhotoProcessingActivity extends Activity {
 		mEditActions = savedInstanceState.getIntegerArrayList(SAVE_EDIT_ACTIONS);
 		if (mEditActions == null) {
 			mEditActions = new ArrayList<Integer>();
+		}
+		String currentCameraFilePath = savedInstanceState.getString(SAVE_CAMERA_FILE_PATH);
+		if (currentCameraFilePath != null) {
+			mOriginalPhotoPath = currentCameraFilePath;
 		}
 		if (mOriginalPhotoPath != null) {
 			loadFromCache();
@@ -184,15 +196,51 @@ public class PhotoProcessingActivity extends Activity {
 			Uri photoUri = data.getData();
 			mImageView.setImageBitmap(null);
 			mOriginalPhotoPath = MediaUtils.getPath(this, photoUri);
-			loadOriginalPhoto();
+			loadPhoto(mOriginalPhotoPath);
+			mImageView.setImageBitmap(mBitmap);
+			saveToCache(mBitmap);
+		} else if (requestCode == REQUEST_CODE_CAMERA && resultCode == RESULT_OK) {
+			mImageView.setImageBitmap(null);
+			loadPhoto(mOriginalPhotoPath);
 			mImageView.setImageBitmap(mBitmap);
 			saveToCache(mBitmap);
 		}
 	}
 	
-	public void onLoadButtonClick(View v) {
+	private int getCameraFileCount() {
+		SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		return prefs.getInt(PREFS_KEY_CAMERA_FILE_COUNT, 0);
+	}
+	
+	private void incrementCameraFileCount() {
+		SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		int count = prefs.getInt(PREFS_KEY_CAMERA_FILE_COUNT, 0) + 1;
+		Editor editor = prefs.edit();
+		editor.putInt(PREFS_KEY_CAMERA_FILE_COUNT, count);
+		editor.apply();
+	}
+	
+	public void onGalleryButtonClick(View v) {
 		Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 		startActivityForResult(i, REQUEST_CODE_SELECT_PHOTO);
+	}
+	
+	public void onCameraButtonClick(View v) {
+		File saveDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Lightbox/");
+		saveDir.mkdir();
+		String format = String.format("%%0%dd", 3);
+		File saveFile;
+		do {
+			int count = getCameraFileCount();
+			String filename = "Lightbox_" + String.format(format, count) +"_000.jpeg";
+			saveFile = new File(saveDir, filename);
+			incrementCameraFileCount();
+		} while (saveFile.exists());
+		
+		Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE );
+		mOriginalPhotoPath = saveFile.getAbsolutePath();
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(saveFile));
+		startActivityForResult(intent, REQUEST_CODE_CAMERA);
 	}
 	
 	public void onFilterButtonClick(View v) {
@@ -396,13 +444,13 @@ public class PhotoProcessingActivity extends Activity {
 		File file = new File(mOriginalPhotoPath);
 		File saveDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Lightbox/");
 		saveDir.mkdir();
-		String name = file.getName().substring(0, file.getName().lastIndexOf('.'));
+		String name = file.getName().substring(0, file.getName().lastIndexOf('.')) + "_";
 		int count = 0;
 		String format = String.format("%%0%dd", 3);
 		File saveFile;
 		do {
 			count++;
-			String filename = name + "_" + String.format(format, count) +".jpeg";
+			String filename = name + String.format(format, count) +".jpeg";
 			saveFile = new File(saveDir, filename);
 		} while (saveFile.exists());
 		
@@ -428,14 +476,14 @@ public class PhotoProcessingActivity extends Activity {
 		return "";
 	}
 	
-	private void loadOriginalPhoto() {
+	private void loadPhoto(String path) {
 		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 		
 		if (mBitmap != null) {
 			mBitmap.recycle();
 		}
 		
-		mBitmap = BitmapUtils.getSampledBitmap(mOriginalPhotoPath, displayMetrics.widthPixels, displayMetrics.heightPixels);
+		mBitmap = BitmapUtils.getSampledBitmap(path, displayMetrics.widthPixels, displayMetrics.heightPixels);
 		
 		if (mBitmap != null && !mBitmap.isMutable()) {
 			mBitmap = PhotoProcessing.makeBitmapMutable(mBitmap);
@@ -605,7 +653,7 @@ public class PhotoProcessingActivity extends Activity {
 			PhotoProcessingActivity activity = getActivity();
 			
 			if (activity != null) {
-				activity.loadOriginalPhoto();
+				activity.loadPhoto(activity.mOriginalPhotoPath);
 				int position = params[0];
 				Bitmap bitmap = PhotoProcessing.filterPhoto(activity.mBitmap, position);
 				for (Integer editAction : activity.mEditActions) {

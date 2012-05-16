@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:background="@android:color/black" >
+    android:background="@android:color/black"
+    android:orientation="vertical" >
 
     <RelativeLayout
         android:layout_width="0dp"
@@ -47,38 +47,45 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" >
 
-        <Button
+        <ImageButton
             android:id="@+id/buttonLoad"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="onLoadButtonClick"
-            android:text="@string/buttonLoad" />
+            android:onClick="onGalleryButtonClick"
+            android:src="@android:drawable/ic_menu_gallery" />
 
-        <Button
+        <ImageButton
+            android:id="@+id/buttonLoad"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCameraButtonClick"
+            android:src="@android:drawable/ic_menu_camera" />
+
+        <ImageButton
             android:id="@+id/buttonFilter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onFilterButtonClick"
-            android:text="@string/buttonFilter"
-            android:width="0dp" />
+            android:src="@drawable/ic_menu_star" />
 
-        <Button
+        <ImageButton
             android:id="@+id/buttonEdit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onEditButtonClick"
-            android:text="@string/buttonEdit" />
+            android:src="@android:drawable/ic_menu_always_landscape_portrait" />
 
-        <Button
+        <ImageButton
             android:id="@+id/buttonSave"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
-            android:text="@string/buttonSave" />
+            android:src="@android:drawable/ic_menu_save" />
     </LinearLayout>
 
 </RelativeLayout>
