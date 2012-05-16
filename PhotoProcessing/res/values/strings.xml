@@ -33,4 +33,7 @@
     <string name="rotating_90_right">Rotating 90° right&#8230;</string>
     <string name="rotating_90_left">Rotating 90° left&#8230;</string>
     <string name="rotating_180">Rotating 180°&#8230;</string>
+    
+    <!-- Save action -->
+    <string name="saved_photo_toast_message">Saved photo to %s</string>
 </resources>

@@ -33,6 +33,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,6 +50,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lightbox.android.photoprocessing.utils.BitmapUtils;
 import com.lightbox.android.photoprocessing.utils.FileUtils;
@@ -390,7 +392,7 @@ public class PhotoProcessingActivity extends Activity {
 		}
 	}
 	
-	private void savePhoto(Bitmap bitmap) {
+	private String savePhoto(Bitmap bitmap) {
 		File file = new File(mOriginalPhotoPath);
 		File saveDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Lightbox/");
 		saveDir.mkdir();
@@ -408,6 +410,8 @@ public class PhotoProcessingActivity extends Activity {
 		try {
 			fos = new FileOutputStream(saveFile);
 			bitmap.compress(CompressFormat.JPEG, 95, fos);
+			
+			return saveFile.getAbsolutePath();
 		} catch (FileNotFoundException e) {
 			Log.w(TAG, e);
 		} finally {
@@ -420,6 +424,8 @@ public class PhotoProcessingActivity extends Activity {
 				}
 			}
 		}
+		
+		return "";
 	}
 	
 	private void loadOriginalPhoto() {
@@ -682,7 +688,8 @@ public class PhotoProcessingActivity extends Activity {
 	}
 	
 	private static class SavePhotoTask extends AsyncTask<Void, Void, Void> {
-		WeakReference<PhotoProcessingActivity> mActivityRef;
+		private WeakReference<PhotoProcessingActivity> mActivityRef;
+		private String mSavePath;
 		
 		public SavePhotoTask(PhotoProcessingActivity activity) {
 			mActivityRef = new WeakReference<PhotoProcessingActivity>(activity);
@@ -723,7 +730,7 @@ public class PhotoProcessingActivity extends Activity {
 					for (Integer editAction : activity.mEditActions) {
 						bitmap = PhotoProcessing.applyEditAction(bitmap, editAction);
 					}
-					activity.savePhoto(bitmap);
+					mSavePath = activity.savePhoto(bitmap);
 				} catch (IOException e) {
 					Log.w(TAG, e);
 				} 
@@ -736,6 +743,7 @@ public class PhotoProcessingActivity extends Activity {
 			PhotoProcessingActivity activity = getActivity();
 			if (activity != null) {
 				activity.hideProgressDialog();
+				Toast.makeText(activity, activity.getString(R.string.saved_photo_toast_message, mSavePath), Toast.LENGTH_LONG).show();
 			}
 		}
 	}
