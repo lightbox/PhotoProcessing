@@ -20,12 +20,23 @@
             android:scaleType="fitCenter" />
 
         <ListView
-            android:id="@+id/optionsList"
+            android:id="@+id/filterList"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:background="#BB000000"
-			android:cacheColorHint="@android:color/transparent" android:layout_alignParentBottom="true">
+            android:cacheColorHint="@android:color/transparent" >
+        </ListView>
+
+        <ListView
+            android:id="@+id/editList"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:background="#BB000000"
+            android:cacheColorHint="@android:color/transparent" >
         </ListView>
     </RelativeLayout>
 
@@ -40,29 +51,33 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/buttonLoad" android:onClick="onLoadButtonClick"/>
+            android:onClick="onLoadButtonClick"
+            android:text="@string/buttonLoad" />
 
         <Button
             android:id="@+id/buttonFilter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:onClick="onFilterButtonClick"
             android:text="@string/buttonFilter"
-            android:width="0dp" android:onClick="onFilterButtonClick"/>
+            android:width="0dp" />
 
         <Button
             android:id="@+id/buttonEdit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/buttonEdit" android:onClick="onEditButtonClick"/>
+            android:onClick="onEditButtonClick"
+            android:text="@string/buttonEdit" />
 
         <Button
             android:id="@+id/buttonSave"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/buttonSave" android:onClick="onSaveButtonClick"/>
+            android:onClick="onSaveButtonClick"
+            android:text="@string/buttonSave" />
     </LinearLayout>
 
 </RelativeLayout>

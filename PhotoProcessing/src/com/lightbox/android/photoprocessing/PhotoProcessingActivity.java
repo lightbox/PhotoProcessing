@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import android.R.anim;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -38,6 +39,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -60,7 +67,10 @@ public class PhotoProcessingActivity extends Activity {
 	private String mOriginalPhotoPath = null;
 	private Bitmap mBitmap = null;
 	private ImageView mImageView = null;
-	private ListView mListView = null;
+	private ListView mFilterListView = null;
+	private ListView mEditListView = null;
+	private boolean mIsFilterListShowing = false;
+	private boolean mIsEditListShowing = false;
 	
 	private int mCurrentFilter = 0;
 	private int mCurrentEditAction = 0;
@@ -81,8 +91,30 @@ public class PhotoProcessingActivity extends Activity {
 
 		mImageView = (ImageView)findViewById(R.id.imageViewPhoto);
 		
-		mListView = (ListView)findViewById(R.id.optionsList);
-		mListView.setVisibility(View.GONE);
+		mFilterListView = (ListView)findViewById(R.id.filterList);
+		mFilterListView.setVisibility(View.INVISIBLE);
+		mFilterListView.setAdapter(new FilterListAdapter(this));
+		mFilterListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+				sFilterTask = new FilterTask(PhotoProcessingActivity.this);
+				mCurrentFilter = position;
+				sFilterTask.execute(position);
+			}
+		});
+		
+		mEditListView = (ListView)findViewById(R.id.editList);
+		mEditListView.setVisibility(View.INVISIBLE);
+		mEditListView.setAdapter(new EditListAdapter(this));
+		mEditListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+				sEditActionTask = new EditActionTask(PhotoProcessingActivity.this);
+				mCurrentEditAction = position;
+				mEditActions.add(position);
+				sEditActionTask.execute(position);
+			}
+		});
 	}
 	
 	@Override
@@ -131,8 +163,10 @@ public class PhotoProcessingActivity extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-		if (mListView.getVisibility() == View.VISIBLE) {
-			mListView.setVisibility(View.GONE);
+		if (mIsFilterListShowing) {
+			hideFilterList();
+		} else if (mIsEditListShowing) {
+			hideEditList();
 		} else {
 			super.onBackPressed();
 		}
@@ -161,35 +195,176 @@ public class PhotoProcessingActivity extends Activity {
 	}
 	
 	public void onFilterButtonClick(View v) {
-		mListView.setAdapter(new FilterListAdapter(this));
-		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-				sFilterTask = new FilterTask(PhotoProcessingActivity.this);
-				mCurrentFilter = position;
-				sFilterTask.execute(position);
-			}
-		});
-		mListView.setVisibility(View.VISIBLE);
+		if (mIsFilterListShowing) {
+			hideFilterList();
+		} else {
+			showFilterList();
+		}
 	}
 	
 	public void onEditButtonClick(View v) {
-		mListView.setAdapter(new EditListAdapter(this));
-		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-				sEditActionTask = new EditActionTask(PhotoProcessingActivity.this);
-				mCurrentEditAction = position;
-				mEditActions.add(position);
-				sEditActionTask.execute(position);
-			}
-		});
-		mListView.setVisibility(View.VISIBLE);
+		if (mIsEditListShowing) {
+			hideEditList();
+		} else {
+			showEditList();
+		}
 	}
 	
 	public void onSaveButtonClick(View v) {
 		sSavePhotoTask = new SavePhotoTask(this);
 		sSavePhotoTask.execute();		
+	}
+
+	private void showFilterList() {
+		if (mIsFilterListShowing) {
+			return;
+		}
+		
+		hideEditList();
+		
+		TranslateAnimation translateAnimation = new TranslateAnimation(
+				TranslateAnimation.RELATIVE_TO_SELF, 1.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f);
+		translateAnimation.setInterpolator(new DecelerateInterpolator(2.0f));
+		AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
+		AnimationSet animation = new AnimationSet(false);
+		animation.addAnimation(translateAnimation);
+		animation.addAnimation(alphaAnimation);
+		animation.setAnimationListener(new AnimationListener() {			
+			@Override
+			public void onAnimationStart(Animation animation) {
+				mFilterListView.setVisibility(View.VISIBLE);
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+				// Do nothing
+			}
+			
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				// Do nothing
+			}
+		});
+		animation.setDuration(500);
+		mFilterListView.startAnimation(animation);
+
+		mIsFilterListShowing = true;
+	}
+	
+	private void hideFilterList() {
+		if (!mIsFilterListShowing) {
+			return;
+		}
+		
+		TranslateAnimation translateAnimation = new TranslateAnimation(
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 1.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f);
+		translateAnimation.setInterpolator(new DecelerateInterpolator(2.0f));
+		AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
+		AnimationSet animation = new AnimationSet(false);
+		animation.addAnimation(translateAnimation);
+		animation.addAnimation(alphaAnimation);
+		animation.setAnimationListener(new AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {
+				// Do nothing
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+				// Do nothing
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				mFilterListView.setVisibility(View.INVISIBLE);
+			}
+		});
+		animation.setDuration(500);
+		mFilterListView.startAnimation(animation);
+		
+		mIsFilterListShowing = false;
+	}
+	
+	private void showEditList() {
+		if (mIsEditListShowing) {
+			return;
+		}
+		
+		hideFilterList();
+		
+		TranslateAnimation translateAnimation = new TranslateAnimation(
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 1.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f);
+		translateAnimation.setInterpolator(new DecelerateInterpolator(2.0f));
+		AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
+		AnimationSet animation = new AnimationSet(false);
+		animation.addAnimation(translateAnimation);
+		animation.addAnimation(alphaAnimation);
+		animation.setAnimationListener(new AnimationListener() {			
+			@Override
+			public void onAnimationStart(Animation animation) {
+				mEditListView.setVisibility(View.VISIBLE);
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+				// Do nothing
+			}
+			
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				// Do nothing
+			}
+		});
+		animation.setDuration(500);
+		mEditListView.startAnimation(animation);
+		
+		mIsEditListShowing = true;
+	}
+	
+	private void hideEditList() {
+		if (!mIsEditListShowing) {
+			return;
+		}
+		
+		TranslateAnimation translateAnimation = new TranslateAnimation(
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 0.0f,
+				TranslateAnimation.RELATIVE_TO_SELF, 1.0f);
+		translateAnimation.setInterpolator(new DecelerateInterpolator(2.0f));
+		AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
+		AnimationSet animation = new AnimationSet(false);
+		animation.addAnimation(translateAnimation);
+		animation.addAnimation(alphaAnimation);
+		animation.setAnimationListener(new AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {
+				// Do nothing
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+				// Do nothing
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				mEditListView.setVisibility(View.INVISIBLE);
+			}
+		});
+		animation.setDuration(500);
+		mEditListView.startAnimation(animation);
+		
+		mIsEditListShowing = false;
 	}
 	
 	private void saveToCache(Bitmap bitmap) {
