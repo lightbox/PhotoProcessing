@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import android.R.anim;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -395,7 +394,15 @@ public class PhotoProcessingActivity extends Activity {
 		File file = new File(mOriginalPhotoPath);
 		File saveDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Lightbox/");
 		saveDir.mkdir();
-		File saveFile = new File(saveDir, file.getName());
+		String name = file.getName().substring(0, file.getName().lastIndexOf('.'));
+		int count = 0;
+		String format = String.format("%%0%dd", 3);
+		File saveFile;
+		do {
+			count++;
+			String filename = name + "_" + String.format(format, count) +".jpeg";
+			saveFile = new File(saveDir, filename);
+		} while (saveFile.exists());
 		
 		FileOutputStream fos = null;
 		try {
