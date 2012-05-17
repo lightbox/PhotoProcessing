@@ -39,11 +39,10 @@ import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -52,14 +51,12 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.lightbox.android.photoprocessing.R.id;
 import com.lightbox.android.photoprocessing.utils.BitmapUtils;
 import com.lightbox.android.photoprocessing.utils.FileUtils;
 import com.lightbox.android.photoprocessing.utils.MediaUtils;
@@ -298,7 +295,6 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 	}
 	
 	private void showFilterList() {
-		Log.d(TAG, "showFilterList mIsShowing:"+mIsFilterListShowing);
 		if (mIsFilterListShowing) {
 			return;
 		}
