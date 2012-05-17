@@ -298,6 +298,7 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 	}
 	
 	private void showFilterList() {
+		Log.d(TAG, "showFilterList mIsShowing:"+mIsFilterListShowing);
 		if (mIsFilterListShowing) {
 			return;
 		}
@@ -331,7 +332,13 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 			}
 		});
 		animation.setDuration(500);
+		animation.setFillAfter(true);
 		mFilterListView.startAnimation(animation);
+		
+		//This is needed because some older android
+		//versions contain a bug where AnimationListeners
+		//are not called in Animations
+		mFilterListView.setVisibility(View.VISIBLE);
 
 		mIsFilterListShowing = true;
 	}
@@ -408,6 +415,11 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 		});
 		animation.setDuration(500);
 		mEditListView.startAnimation(animation);
+
+		//This is needed because some older android
+		//versions contain a bug where AnimationListeners
+		//are not called in Animations
+		mEditListView.setVisibility(View.VISIBLE);
 		
 		mIsEditListShowing = true;
 	}
