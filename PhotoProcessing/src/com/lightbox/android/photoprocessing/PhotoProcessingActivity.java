@@ -35,12 +35,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnLongClickListener;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -49,6 +52,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -59,7 +64,7 @@ import com.lightbox.android.photoprocessing.utils.BitmapUtils;
 import com.lightbox.android.photoprocessing.utils.FileUtils;
 import com.lightbox.android.photoprocessing.utils.MediaUtils;
 
-public class PhotoProcessingActivity extends Activity {
+public class PhotoProcessingActivity extends Activity implements OnLongClickListener {
 	private static final String TAG = "PhotoProcessingActivity";
 	
 	public static final int REQUEST_CODE_SELECT_PHOTO = 1;
@@ -91,6 +96,7 @@ public class PhotoProcessingActivity extends Activity {
 		
 	private ProgressDialog mProgressDialog = null;
 	
+	private Vibrator mVibrator = null;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -128,6 +134,22 @@ public class PhotoProcessingActivity extends Activity {
 		findViewById(R.id.buttonFilter).setEnabled(false);
 		findViewById(R.id.buttonEdit).setEnabled(false);
 		findViewById(R.id.buttonSave).setEnabled(false);
+		
+		ImageButton galleryButton = (ImageButton)findViewById(R.id.buttonGallery);
+		galleryButton.setOnLongClickListener(this);
+		ImageButton cameraButton = (ImageButton)findViewById(R.id.buttonCamera);
+		cameraButton.setOnLongClickListener(this);
+		ImageButton filterButton = (ImageButton)findViewById(R.id.buttonFilter);
+		filterButton.setOnLongClickListener(this);
+		filterButton.setEnabled(false);
+		ImageButton editButton = (ImageButton)findViewById(R.id.buttonEdit);
+		editButton.setOnLongClickListener(this);
+		editButton.setEnabled(false);
+		ImageButton saveButton = (ImageButton)findViewById(R.id.buttonSave);
+		saveButton.setOnLongClickListener(this);
+		saveButton.setEnabled(false);		
+
+		mVibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
 	}
 	
 	@Override
@@ -500,6 +522,9 @@ public class PhotoProcessingActivity extends Activity {
 			mBitmap = PhotoProcessing.makeBitmapMutable(mBitmap);
 		}
 		
+		int angle = MediaUtils.getExifOrientation(path);
+		mBitmap = PhotoProcessing.rotate(mBitmap, angle);
+		
 		enableFilterEditAndSaveButtons();
 	}
 	
@@ -556,6 +581,33 @@ public class PhotoProcessingActivity extends Activity {
 		if (mProgressDialog != null && mProgressDialog.isShowing()) {
 			mProgressDialog.dismiss();
 		}
+	}
+	
+	@Override
+	public boolean onLongClick(View view) {
+		switch (view.getId()) {
+		case R.id.buttonGallery:
+			mVibrator.vibrate(40);
+			Toast.makeText(this, R.string.toast_hint_gallery, Toast.LENGTH_SHORT).show();
+			break;
+		case R.id.buttonCamera:
+			mVibrator.vibrate(40);
+			Toast.makeText(this, R.string.toast_hint_camera, Toast.LENGTH_SHORT).show();
+			break;
+		case R.id.buttonFilter:
+			mVibrator.vibrate(40);
+			Toast.makeText(this, R.string.toast_hint_filter, Toast.LENGTH_SHORT).show();
+			break;
+		case R.id.buttonEdit:
+			mVibrator.vibrate(40);
+			Toast.makeText(this, R.string.toast_hint_edit, Toast.LENGTH_SHORT).show();
+			break;
+		case R.id.buttonSave:
+			mVibrator.vibrate(40);
+			Toast.makeText(this, R.string.toast_hint_save, Toast.LENGTH_SHORT).show();
+			break;
+		}
+		return false;
 	}
 	
 	private static class FilterListAdapter extends BaseAdapter {
@@ -790,6 +842,8 @@ public class PhotoProcessingActivity extends Activity {
 					byte[] jpegData = FileUtils.readFileToByteArray(jpegFile);
 					PhotoProcessing.nativeLoadResizedJpegBitmap(jpegData, jpegData.length, 1024 * 1024 * 2);
 					Bitmap bitmap = PhotoProcessing.filterPhoto(null, activity.mCurrentFilter);
+					int angle = MediaUtils.getExifOrientation(activity.mOriginalPhotoPath);
+					bitmap = PhotoProcessing.rotate(bitmap, angle);
 					for (Integer editAction : activity.mEditActions) {
 						bitmap = PhotoProcessing.applyEditAction(bitmap, editAction);
 					}

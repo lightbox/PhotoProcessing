@@ -2,10 +2,11 @@
 <resources>
     <string name="app_name">PhotoProcessing</string>
     
-    <string name="buttonLoad">Load</string>
-    <string name="buttonEdit">Edit</string>
-    <string name="buttonFilter">Filter</string>
-    <string name="buttonSave">Save</string>
+    <string name="toast_hint_gallery">Pick from gallery</string>
+    <string name="toast_hint_camera">Use the camera</string>
+    <string name="toast_hint_filter">Apply photo effects</string>
+    <string name="toast_hint_edit">Flip/rotate the photo</string>
+    <string name="toast_hint_save">Save the photo</string>
 
     <!-- Filter names -->
     <string name="filter_original">Original</string>

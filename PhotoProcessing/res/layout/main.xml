@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@android:color/black"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="0dp"
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onGalleryButtonClick"
-            android:src="@android:drawable/ic_menu_gallery" />
+            android:src="@android:drawable/ic_menu_gallery" android:hapticFeedbackEnabled="true" android:longClickable="true"/>
 
         <ImageButton
             android:id="@+id/buttonCamera"
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCameraButtonClick"
-            android:src="@android:drawable/ic_menu_camera" />
+            android:src="@android:drawable/ic_menu_camera" android:hapticFeedbackEnabled="true" android:longClickable="true"/>
 
         <ImageButton
             android:id="@+id/buttonFilter"
@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onFilterButtonClick"
-            android:src="@drawable/ic_menu_star" />
+            android:src="@drawable/ic_menu_star" android:hapticFeedbackEnabled="true" android:longClickable="true"/>
 
         <ImageButton
             android:id="@+id/buttonEdit"
@@ -77,7 +77,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onEditButtonClick"
-            android:src="@android:drawable/ic_menu_always_landscape_portrait" />
+            android:src="@android:drawable/ic_menu_always_landscape_portrait" android:hapticFeedbackEnabled="true" android:longClickable="true"/>
 
         <ImageButton
             android:id="@+id/buttonSave"
@@ -85,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
-            android:src="@android:drawable/ic_menu_save" />
+            android:src="@android:drawable/ic_menu_save" android:hapticFeedbackEnabled="true" android:longClickable="true"/>
     </LinearLayout>
 
 </RelativeLayout>
