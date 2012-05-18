@@ -127,10 +127,13 @@ void applyAnselFilter(Bitmap* bitmap) {
 	register unsigned int i;
 	unsigned int length = (*bitmap).width * (*bitmap).height;
 	Bitmap localBitmap = *bitmap;
+	register unsigned char grey;
+	unsigned char* red = (*bitmap).red;
+	unsigned char* green = (*bitmap).green;
+	unsigned char* blue = (*bitmap).blue;
 	for (i = length; i--; ) {
-		localBitmap.red[i] = localBitmap.green[i] = localBitmap.blue[i] = hardLightLayerPixelComponents(localBitmap.red[i], localBitmap.red[i]);
-		//localBitmap.green[i] = hardLightLayerPixelComponents(localBitmap.green[i], localBitmap.green[i]);
-		//localBitmap.blue[i] = hardLightLayerPixelComponents(localBitmap.blue[i], localBitmap.blue[i]);
+		grey = blackAndWhite(red[i], green[i], blue[i]);
+		localBitmap.red[i] = green[i] = blue[i] = hardLightLayerPixelComponents(grey, grey);
 	}
 }
 
