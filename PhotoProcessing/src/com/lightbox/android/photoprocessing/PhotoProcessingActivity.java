@@ -311,7 +311,7 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 		AnimationSet animation = new AnimationSet(false);
 		animation.addAnimation(translateAnimation);
 		animation.addAnimation(alphaAnimation);
-		animation.setAnimationListener(new AnimationListener() {			
+		/*animation.setAnimationListener(new AnimationListener() {			
 			@Override
 			public void onAnimationStart(Animation animation) {
 				mFilterListView.setVisibility(View.VISIBLE);
@@ -326,7 +326,7 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 			public void onAnimationEnd(Animation animation) {
 				// Do nothing
 			}
-		});
+		});*/
 		animation.setDuration(500);
 		animation.setFillAfter(true);
 		mFilterListView.startAnimation(animation);
@@ -393,7 +393,7 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 		AnimationSet animation = new AnimationSet(false);
 		animation.addAnimation(translateAnimation);
 		animation.addAnimation(alphaAnimation);
-		animation.setAnimationListener(new AnimationListener() {			
+		/*animation.setAnimationListener(new AnimationListener() {			
 			@Override
 			public void onAnimationStart(Animation animation) {
 				mEditListView.setVisibility(View.VISIBLE);
@@ -408,7 +408,7 @@ public class PhotoProcessingActivity extends Activity implements OnLongClickList
 			public void onAnimationEnd(Animation animation) {
 				// Do nothing
 			}
-		});
+		});*/
 		animation.setDuration(500);
 		mEditListView.startAnimation(animation);
 
